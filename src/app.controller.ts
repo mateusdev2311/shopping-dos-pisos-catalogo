@@ -1,8 +1,10 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
 import { Response } from 'express';
+import { existsSync } from 'fs';
 import { join } from 'path';
 
-export const PASTA_PUBLICA = join(__dirname, '..', 'public');
+// O build copia public/ para dist/public: o container da VPS só leva a pasta dist.
+export const PASTA_PUBLICA = existsSync(join(__dirname, 'public')) ? join(__dirname, 'public') : join(__dirname, '..', 'public');
 
 @Controller()
 export class AppController {

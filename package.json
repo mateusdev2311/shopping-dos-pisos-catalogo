@@ -4,7 +4,7 @@
   "private": true,
   "description": "Catálogo de demonstração do Shopping dos Pisos integrado à Kentro (link do catálogo, carrinho ao vivo e handoff).",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && node -e \"require('fs').cpSync('public','dist/public',{recursive:true})\"",
     "start": "node dist/main.js",
     "start:dev": "tsc -p tsconfig.build.json && node dist/main.js",
     "test": "npm run build && node --test test/fluxo.test.js"
