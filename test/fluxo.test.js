@@ -139,6 +139,16 @@ test('link inexistente responde 404 com mensagem para o cliente', async () => {
   assert.match(r.corpo.message, /Peça um novo/);
 });
 
+test('resumo de produtos para a IA', async () => {
+  const { corpo } = await chamar('/api/catalogo/resumo-ia?busca=porcelanato%20madeira');
+  assert.match(corpo.texto, /Porcelanato Amadeirado 20x90 \[Porcelanatos\] — por caixa: Carvalho Natural R\$ 149,90 \(estoque 120\); Nogueira/);
+  assert.match(corpo.texto, /1,26 m² por caixa/);
+  assert.match(corpo.texto, /Compre junto: Argamassa AC-III Porcelanato 20kg, Rejunte Epóxi 1kg, Kit Nivelador/);
+  const nada = await chamar('/api/catalogo/resumo-ia?busca=geladeira');
+  assert.match(nada.corpo.texto, /^Nenhum produto encontrado para "geladeira"\. Catálogo completo:/);
+  assert.equal(nada.corpo.texto.split('\n').filter((l) => l.startsWith('- ')).length, 18);
+});
+
 test('imagens e catálogo', async () => {
   const img = await fetch(`${BASE}/img/REV-HEX-SAL-TER.svg`);
   assert.equal(img.status, 200);

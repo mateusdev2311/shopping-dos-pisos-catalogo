@@ -90,6 +90,33 @@ export class CatalogoService {
     };
   }
 
+  /**
+   * Produtos em texto enxuto para a assistente de IA (vai direto para o contexto dela):
+   * preço, rendimento, variações, estoque e o "compre junto" de cada item.
+   */
+  resumoParaIa(filtro: { busca?: string; categoriaId?: number }): string {
+    let produtos = this.listarProdutos(filtro);
+    let aviso = '';
+    if (!produtos.length && filtro.busca) {
+      aviso = `Nenhum produto encontrado para "${filtro.busca}". Catálogo completo:\n`;
+      produtos = this.listarProdutos({ categoriaId: filtro.categoriaId });
+    }
+    const categorias = new Map(this.categorias.map((c) => [c.id, c.name]));
+    const linhas = produtos.map((p) => {
+      const unidade = UNIDADE_IA[p.unit_measurement] || p.unit_measurement;
+      const promo = Number(p.promotional_price) > 0 ? ` (promoção, de R$ ${brl(Number(p.price))})` : '';
+      const preco = p.children?.length
+        ? p.children.map((v) => `${v.variety_name} R$ ${brl(precoAtual(v.price, v.promotional_price))} (estoque ${v.stock})`).join('; ')
+        : `R$ ${brl(precoAtual(p.price, p.promotional_price))}${promo} (estoque ${p.stock})`;
+      const m2 = p.unit_measurement === 'CX' && p.demo.m2PorUnidade
+        ? ` · ${brl(p.demo.m2PorUnidade)} m² por caixa`
+        : p.demo.m2PorUnidade ? ` · rende ~${brl(p.demo.m2PorUnidade)} m² por ${unidade}` : '';
+      const junto = (this.compreJuntoPorSku[p.sku] || []).map((s) => this.produto(s).name).join(', ');
+      return `- ${p.name} [${categorias.get(p.category_id)}] — por ${unidade}: ${preco}${m2}. ${p.short_description}${junto ? ` Compre junto: ${junto}.` : ''}`;
+    });
+    return `${aviso}${linhas.join('\n')}`;
+  }
+
   /** Produto (pai) de um SKU simples ou de variação. */
   produtoDoSku(sku: string): Produto {
     const produto = this.produtos.find((p) => p.sku === sku || p.children?.some((v) => v.sku === sku));
@@ -101,6 +128,12 @@ export class CatalogoService {
 export function precoAtual(preco: string, promocional: string): number {
   const promo = Number(promocional);
   return promo > 0 ? promo : Number(preco);
+}
+
+const UNIDADE_IA: Record<string, string> = { CX: 'caixa', SC: 'saco', UN: 'unidade', KIT: 'kit', RL: 'rolo' };
+
+function brl(valor: number): string {
+  return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function normalizar(texto: string): string {

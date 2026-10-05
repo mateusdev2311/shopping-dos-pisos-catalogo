@@ -55,3 +55,5 @@ As sessões ficam em memória e num arquivo JSON. Um novo deploy apaga os carrin
 - Extensão **Catálogo Shopping dos Pisos** (`mateus.shoppingdospisos`, id 15): manifest em `https://cdn.a-tend.online/mateus.shoppingdospisos/manifest.json`. A instalação pede `api_url` (URL da VPS) e `api_key`.
 - Automação **108 — Cliente finalizou o carrinho**: disparada pela captura de webhook `catalogo-sdp-…`.
 - Automação **109 — Enviar link do catálogo**: usada pela função `enviar_link_catalogo` da assistente. Troque `URL-DO-CATALOGO` pela URL da VPS.
+- Automação **110 — Consultar produtos**: usada pela função `consultar_produtos`. Chama `GET /api/catalogo/resumo-ia?busca=`. Também tem `URL-DO-CATALOGO` (no elemento `montar_url`).
+- Assistente **2 — Shopping dos Pisos — Vendas (catálogo)** ("Ana"): faz o pré-atendimento do escopo e usa as duas funções acima. Ao receber o evento de pedido finalizado, confirma e transfere com o marcador `pedido_finalizado`.

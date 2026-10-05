@@ -17,6 +17,12 @@ export class CatalogoController {
     return { success: true, data: produtos };
   }
 
+  /** Usada pela automação "Consultar produtos" da assistente de IA. */
+  @Get('api/catalogo/resumo-ia')
+  resumoIa(@Query('busca') busca?: string, @Query('categoria') categoria?: string) {
+    return { texto: this.catalogo.resumoParaIa({ busca: (busca || '').trim(), categoriaId: Number(categoria) || undefined }) };
+  }
+
   @Get('api/catalogo/produtos/:sku')
   produto(@Param('sku') sku: string) {
     return { success: true, data: this.catalogo.produto(sku) };
