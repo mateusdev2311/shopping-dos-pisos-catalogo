@@ -1,0 +1,417 @@
+<style>
+  /* Reserva: o Kentro publica os tokens --ext-* antes deste estilo; :where() não os sobrescreve. */
+  :where(:root) {
+    --ext-color-primary: #7C3AED;
+    --ext-color-on-primary: #fff;
+    --ext-color-primary-soft: rgba(124, 58, 237, .07);
+    --ext-color-bg: #fff;
+    --ext-color-border: #d2d2d2;
+    --ext-color-text: #1e1e1e;
+    --ext-color-text-muted: #565656;
+    --ext-color-error: #ff3b3b;
+    --ext-color-success: #06c270;
+    --ext-radius: 4px;
+    --ext-font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+    --ext-font-size: 14px;
+    --ext-spacing: 8px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: var(--ext-spacing) calc(var(--ext-spacing) * 1.5);
+    font-family: var(--ext-font-family); font-size: var(--ext-font-size); line-height: 1.4;
+    color: var(--ext-color-text); background: var(--ext-color-bg);
+  }
+  [hidden] { display: none !important; }
+  h2 { font-size: 1em; margin: 0 0 6px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .secao { padding: 10px 0; border-bottom: 1px solid var(--ext-color-border); }
+  .secao:last-of-type { border-bottom: 0; }
+  .muted { color: var(--ext-color-text-muted); font-size: .9em; }
+  .linha { display: flex; gap: 6px; align-items: center; }
+  .linha > .cresce { flex: 1; min-width: 0; }
+  input, textarea {
+    width: 100%; font: inherit; padding: 6px 8px; color: var(--ext-color-text);
+    background: var(--ext-color-bg); border: 1px solid var(--ext-color-border); border-radius: var(--ext-radius);
+  }
+  button {
+    font: inherit; cursor: pointer; padding: 6px 12px; border-radius: var(--ext-radius); white-space: nowrap;
+    border: 1px solid var(--ext-color-primary); background: var(--ext-color-bg); color: var(--ext-color-primary);
+  }
+  button.principal { background: var(--ext-color-primary); color: var(--ext-color-on-primary); }
+  button.largo { width: 100%; margin-top: 8px; }
+  button.link { border: 0; padding: 2px 4px; background: none; text-decoration: underline; font-size: .85em; }
+  button:disabled { opacity: .5; cursor: default; }
+  input:focus, button:focus-visible { outline: 2px solid var(--ext-color-primary); outline-offset: 1px; }
+  .aviso { padding: 8px 10px; border-radius: var(--ext-radius); margin: 8px 0; font-size: .9em; }
+  .aviso.erro { background: #fff0f0; color: #b00020; border: 1px solid var(--ext-color-error); }
+  .aviso.info { background: var(--ext-color-primary-soft); border: 1px solid var(--ext-color-border); }
+
+  .status { display: inline-flex; align-items: center; gap: 6px; font-size: .8em; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: #eee; color: #444; }
+  .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .status.navegando { background: #fff4e0; color: #a35f00; }
+  .status.navegando::before { animation: piscar 1.2s infinite; }
+  .status.finalizado { background: #e6f9ef; color: #04784a; }
+  @keyframes piscar { 50% { opacity: .25; } }
+
+  .etapas { display: flex; gap: 4px; margin: 6px 0 2px; }
+  .etapas span { flex: 1; height: 4px; border-radius: 2px; background: var(--ext-color-border); }
+  .etapas span.feita { background: var(--ext-color-success); }
+  .etapas span.atual { background: var(--ext-color-primary); }
+
+  .itens { list-style: none; margin: 0; padding: 0; }
+  .itens li { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--ext-color-border); }
+  .itens li:last-child { border-bottom: 0; }
+  .itens img { width: 36px; height: 36px; border-radius: var(--ext-radius); flex: 0 0 36px; object-fit: cover; background: #eee; }
+  .itens .cresce { flex: 1; min-width: 0; }
+  .itens .nome { font-weight: 600; font-size: .92em; line-height: 1.25; }
+  .itens .valor { font-weight: 600; white-space: nowrap; }
+  .itens li.novo { animation: destaque 2s ease; }
+  @keyframes destaque { from { background: var(--ext-color-primary-soft); } }
+
+  .totais { margin-top: 6px; }
+  .totais div { display: flex; justify-content: space-between; font-size: .92em; }
+  .totais .total { font-size: 1.1em; font-weight: 700; margin-top: 4px; }
+
+  .handoff { margin-top: 4px; padding: 8px 10px; border-radius: var(--ext-radius); background: #f2fbf6; border: 1px solid #b7e8cd; }
+  .handoff dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; font-size: .92em; }
+  .handoff dt { color: var(--ext-color-text-muted); }
+  .handoff dd { margin: 0; font-weight: 500; }
+
+  .eventos { list-style: none; margin: 0; padding: 0; font-size: .85em; }
+  .eventos li { display: flex; gap: 8px; padding: 2px 0; }
+  .eventos time { color: var(--ext-color-text-muted); flex: 0 0 38px; }
+  details { margin-top: 10px; font-size: .8em; color: var(--ext-color-text-muted); }
+  details pre { white-space: pre-wrap; word-break: break-all; max-height: 160px; overflow: auto; }
+  textarea.copiar { position: fixed; left: -9999px; top: 0; }
+</style>
+
+<div id="aviso" class="aviso" hidden></div>
+
+<div id="sem-chat" class="secao" hidden>
+  <p class="muted">Abra um atendimento para acompanhar o carrinho do cliente.</p>
+</div>
+
+<!-- Ainda não há link para este atendimento -->
+<div id="sem-sessao" class="secao" hidden>
+  <h2>Catálogo do cliente</h2>
+  <p class="muted">Nenhum link de catálogo foi enviado neste atendimento. Gere o link e mande para o cliente — ou deixe a assistente enviar.</p>
+  <button type="button" class="principal largo" id="btn-gerar">Gerar link do catálogo</button>
+</div>
+
+<div id="com-sessao" hidden>
+  <div class="secao">
+    <h2>Catálogo do cliente <span id="status" class="status"></span></h2>
+    <div class="etapas" aria-hidden="true"><span id="etapa-1"></span><span id="etapa-2"></span><span id="etapa-3"></span><span id="etapa-4"></span></div>
+    <p class="muted" id="status-texto"></p>
+    <div class="linha" style="margin-top:6px">
+      <input class="cresce" id="link" readonly aria-label="Link do catálogo">
+      <button type="button" id="btn-copiar-link">Copiar</button>
+    </div>
+  </div>
+
+  <!-- Resumo do handoff (pedido finalizado) -->
+  <div class="secao" id="secao-handoff" hidden>
+    <h2>Pedido para finalizar</h2>
+    <div class="handoff"><dl id="handoff"></dl></div>
+    <button type="button" class="principal largo" id="btn-copiar-resumo">Copiar resumo do atendimento</button>
+  </div>
+
+  <div class="secao">
+    <h2>Carrinho <span class="muted" id="carrinho-qtd"></span></h2>
+    <ul class="itens" id="itens"></ul>
+    <p class="muted" id="carrinho-vazio">O cliente ainda não adicionou produtos.</p>
+    <div class="totais" id="totais" hidden></div>
+  </div>
+
+  <div class="secao">
+    <h2>Atividade <button type="button" class="link" id="btn-atualizar">Atualizar</button></h2>
+    <ul class="eventos" id="eventos"></ul>
+  </div>
+</div>
+
+<details>
+  <summary>Detalhes técnicos</summary>
+  <pre id="log"></pre>
+</details>
+
+<script>
+(function () {
+  'use strict';
+
+  var INTERVALO_MS = 5000; // 12 chamadas/min: abaixo do limite de 30/min do omni.http
+  var cfg = { apiUrl: '', apiKey: '' };
+  var chat = null;          // { id, nome, telefone }
+  var sessao = null;
+  var timer = null;
+  var buscando = false;
+  var skusConhecidos = {};
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function log(texto) {
+    var pre = $('log');
+    pre.textContent = (new Date().toLocaleTimeString() + ' ' + texto + '\n' + pre.textContent).slice(0, 5000);
+  }
+  function aviso(texto, tipo) {
+    var a = $('aviso');
+    if (!texto) { a.hidden = true; return; }
+    a.className = 'aviso ' + (tipo || 'info');
+    a.textContent = texto;
+    a.hidden = false;
+  }
+  function el(tag, props, filhos) {
+    var e = document.createElement(tag);
+    if (props) for (var k in props) {
+      if (k === 'text') e.textContent = props[k];
+      else if (k === 'className') e.className = props[k];
+      else e.setAttribute(k, props[k]);
+    }
+    (filhos || []).forEach(function (f) { if (f) e.appendChild(typeof f === 'string' ? document.createTextNode(f) : f); });
+    return e;
+  }
+  function limpar(no) { while (no.firstChild) no.removeChild(no.firstChild); }
+  function brl(v) { return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+  function hora(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+  var UNIDADES = { CX: ['cx', 'cx'], SC: ['saco', 'sacos'], UN: ['un', 'un'], KIT: ['kit', 'kits'], RL: ['rolo', 'rolos'] };
+  function unidade(s, q) { var n = UNIDADES[s] || [s, s]; return q === 1 ? n[0] : n[1]; }
+
+  if (typeof omni === 'undefined') { aviso('Esta tela só funciona dentro do Kentro.', 'erro'); return; }
+
+  // ── Serviço do catálogo (via omni.http.request, executado no servidor do Kentro) ──
+  function api(caminho, opcoes) {
+    opcoes = opcoes || {};
+    if (!cfg.apiUrl || !cfg.apiKey) return Promise.reject({ mensagem: 'A extensão está sem o endereço ou a chave do serviço do catálogo. Peça ao administrador para configurar a instalação.' });
+    var req = {
+      url: cfg.apiUrl.replace(/\/+$/, '') + caminho,
+      method: opcoes.method || 'GET',
+      headers: { 'X-Api-Key': cfg.apiKey }
+    };
+    if (opcoes.body) { req.headers['Content-Type'] = 'application/json'; req.body = opcoes.body; }
+    return omni.http.request(req).then(function (r) { return interpretar(r.status, r.body); }, function (e) {
+      if (e && e.code === 'http_error' && e.status) return interpretar(e.status, e.body);
+      log('omni.http falhou: ' + (e && e.code) + ' ' + (e && e.message));
+      var msg = e && e.code === 'rate_limited' ? 'Limite de chamadas do Kentro atingido. Aguarde alguns segundos.'
+        : 'Não foi possível falar com o serviço do catálogo (' + ((e && (e.message || e.code)) || 'erro') + ').';
+      throw { codigo: e && e.code, mensagem: msg };
+    });
+  }
+  function interpretar(status, texto) {
+    var dados;
+    try { dados = typeof texto === 'string' ? (texto ? JSON.parse(texto) : {}) : (texto || {}); } catch (e) { dados = {}; }
+    if (status >= 200 && status < 300) return dados;
+    var erro = { status: status, mensagem: dados.message || ('Erro ' + status + ' no serviço do catálogo.') };
+    if (status === 401) erro.mensagem = 'Chave do serviço do catálogo inválida. Confira a configuração da extensão.';
+    throw erro;
+  }
+
+  // ── Consulta periódica ──────────────────────────────────────────────────
+  function agendar() {
+    clearTimeout(timer);
+    if (!chat || document.hidden) return;
+    if (sessao && sessao.status === 'finalizado') return; // pedido fechado não muda mais
+    timer = setTimeout(atualizar, INTERVALO_MS);
+  }
+
+  function atualizar() {
+    if (!chat || buscando) return;
+    var id = chat.id;
+    buscando = true;
+    api('/api/sessoes/chat/' + encodeURIComponent(id)).then(function (s) {
+      if (!chat || chat.id !== id) return;
+      aviso(null);
+      mostrarSessao(s);
+    }, function (e) {
+      if (!chat || chat.id !== id) return;
+      if (e.status === 404) { mostrarSemSessao(); return; }
+      aviso(e.mensagem, 'erro');
+    }).then(function () { buscando = false; agendar(); });
+  }
+
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) atualizar(); else clearTimeout(timer); });
+
+  // ── Telas ───────────────────────────────────────────────────────────────
+  function mostrarSemSessao() {
+    sessao = null;
+    $('com-sessao').hidden = true;
+    $('sem-sessao').hidden = false;
+  }
+
+  var STATUS = {
+    link_enviado: { rotulo: 'Link enviado', etapa: 1, texto: 'Aguardando o cliente abrir o catálogo.' },
+    navegando: { rotulo: 'Montando o carrinho', etapa: 2, texto: 'O cliente está escolhendo os produtos — o carrinho atualiza sozinho.' },
+    finalizado: { rotulo: 'Finalizado', etapa: 4, texto: 'O cliente finalizou. Confira o resumo e conclua a venda.' }
+  };
+
+  function mostrarSessao(s) {
+    var mudouStatus = !sessao || sessao.status !== s.status;
+    sessao = s;
+    $('sem-sessao').hidden = true;
+    $('com-sessao').hidden = false;
+    $('link').value = s.url;
+
+    var st = STATUS[s.status] || STATUS.link_enviado;
+    var etapa = s.status === 'navegando' && s.itens.length ? 3 : st.etapa;
+    $('status').textContent = st.rotulo;
+    $('status').className = 'status ' + s.status;
+    $('status-texto').textContent = st.texto + (s.abertaEm ? ' Abriu às ' + hora(s.abertaEm) + '.' : '');
+    for (var i = 1; i <= 4; i++) $('etapa-' + i).className = i < etapa || s.status === 'finalizado' ? 'feita' : i === etapa ? 'atual' : '';
+
+    renderItens(s);
+    renderHandoff(s);
+    renderEventos(s);
+    if (mudouStatus && s.status === 'finalizado') {
+      Promise.resolve(omni.ui.toast('O cliente finalizou o carrinho: ' + brl(s.totais.total), 'success')).catch(function () {});
+    }
+  }
+
+  function renderItens(s) {
+    var ul = $('itens');
+    limpar(ul);
+    var novos = {};
+    s.itens.forEach(function (i) {
+      var chave = i.sku + ':' + i.quantidade;
+      novos[chave] = true;
+      var detalhe = i.quantidade + ' ' + unidade(i.unidade, i.quantidade) + ' × ' + brl(i.precoUnitario) + (i.m2 ? ' · ' + String(i.m2).replace('.', ',') + ' m²' : '');
+      var miniatura = el('img', { src: cfg.apiUrl.replace(/\/+$/, '') + '/img/' + encodeURIComponent(i.sku) + '.svg', alt: '' });
+      miniatura.addEventListener('error', function () { miniatura.style.visibility = 'hidden'; });
+      ul.appendChild(el('li', { className: skusConhecidos[chave] || !Object.keys(skusConhecidos).length ? '' : 'novo' }, [
+        miniatura,
+        el('div', { className: 'cresce' }, [
+          el('div', { className: 'nome', text: i.nome + (i.variacao ? ' — ' + i.variacao : '') }),
+          el('div', { className: 'muted', text: detalhe })
+        ]),
+        el('span', { className: 'valor', text: brl(i.subtotal) })
+      ]));
+    });
+    skusConhecidos = novos;
+    if (!s.itens.length) skusConhecidos = {};
+    $('carrinho-vazio').hidden = s.itens.length > 0;
+    $('carrinho-qtd').textContent = s.itens.length ? s.totais.itens + ' ' + (s.totais.itens === 1 ? 'item' : 'itens') : '';
+    var t = $('totais');
+    limpar(t);
+    t.hidden = !s.itens.length;
+    if (!s.itens.length) return;
+    t.appendChild(el('div', null, [el('span', { text: 'Subtotal' }), el('span', { text: brl(s.totais.subtotal) })]));
+    if (s.checkout && s.checkout.tipo === 'entrega') t.appendChild(el('div', null, [el('span', { text: 'Frete' }), el('span', { text: s.totais.frete ? brl(s.totais.frete) : 'Grátis' })]));
+    t.appendChild(el('div', { className: 'total' }, [el('span', { text: 'Total' }), el('span', { text: brl(s.totais.total) })]));
+  }
+
+  function renderHandoff(s) {
+    var c = s.checkout;
+    $('secao-handoff').hidden = !(s.status === 'finalizado' && c);
+    if (!c) return;
+    var dl = $('handoff');
+    limpar(dl);
+    function par(rotulo, valor) { if (valor) { dl.appendChild(el('dt', { text: rotulo })); dl.appendChild(el('dd', { text: valor })); } }
+    par('Cliente', s.cliente.nome);
+    par('Telefone', s.cliente.telefone);
+    par('Tipo', c.tipo === 'entrega' ? 'Entrega' : 'Retirada');
+    if (c.tipo === 'entrega' && c.entrega) {
+      var e = c.entrega;
+      par('Endereço', e.rua + ', nº ' + e.numero + (e.complemento ? ' — ' + e.complemento : '') + ' — ' + e.bairro + ' — ' + e.cidade + '/' + e.estado);
+      par('CEP', e.cep);
+      par('Referência', e.referencia);
+    } else if (c.loja) {
+      par('Loja', c.loja.nome);
+      par('Endereço', c.loja.endereco);
+    }
+    par('Total', brl(s.totais.total));
+    par('Observações', c.observacoes);
+    par('Finalizado', hora(s.finalizadaEm));
+  }
+
+  function renderEventos(s) {
+    var ul = $('eventos');
+    limpar(ul);
+    (s.eventos || []).slice(0, 8).forEach(function (ev) {
+      ul.appendChild(el('li', null, [el('time', { text: hora(ev.em) }), el('span', { text: ev.texto })]));
+    });
+  }
+
+  // ── Ações ───────────────────────────────────────────────────────────────
+  function copiar(texto, sucesso) {
+    function viaSelecao() {
+      var area = el('textarea', { className: 'copiar', readonly: 'readonly' });
+      area.value = texto;
+      document.body.appendChild(area);
+      area.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(area);
+      return ok;
+    }
+    var tentativa = navigator.clipboard && navigator.clipboard.writeText
+      ? navigator.clipboard.writeText(texto).then(function () { return true; }, viaSelecao)
+      : Promise.resolve(viaSelecao());
+    tentativa.then(function (ok) {
+      if (ok) Promise.resolve(omni.ui.toast(sucesso, 'success')).catch(function () {});
+      else aviso('Não foi possível copiar automaticamente. Selecione o texto e copie com Ctrl+C.', 'erro');
+    });
+  }
+
+  $('btn-gerar').addEventListener('click', function () {
+    if (!chat) return;
+    var botao = this;
+    botao.disabled = true;
+    api('/api/sessoes', { method: 'POST', body: { chatId: String(chat.id), nome: chat.nome, telefone: chat.telefone } }).then(function (s) {
+      log('link gerado ' + s.url);
+      mostrarSessao(s);
+      copiar(s.url, 'Link copiado. Cole na conversa para enviar ao cliente.');
+      agendar();
+    }, function (e) { aviso(e.mensagem, 'erro'); }).then(function () { botao.disabled = false; });
+  });
+
+  $('btn-copiar-link').addEventListener('click', function () {
+    if (sessao) copiar(sessao.url, 'Link do catálogo copiado.');
+  });
+  $('link').addEventListener('focus', function () { this.select(); });
+
+  $('btn-copiar-resumo').addEventListener('click', function () {
+    if (sessao) copiar(sessao.resumo, 'Resumo copiado.');
+  });
+
+  $('btn-atualizar').addEventListener('click', function () { clearTimeout(timer); atualizar(); });
+
+  // ── Atendimento aberto no Kentro ────────────────────────────────────────
+  function carregarChat(c) {
+    var id = c ? c.id : null;
+    if (chat && chat.id === id) return;
+    clearTimeout(timer);
+    sessao = null;
+    skusConhecidos = {};
+    aviso(null);
+    $('com-sessao').hidden = true;
+    $('sem-sessao').hidden = true;
+    if (!c) { chat = null; $('sem-chat').hidden = false; return; }
+    $('sem-chat').hidden = true;
+    var base = c.contact || {};
+    chat = { id: id, nome: base.name || '', telefone: String(base.phone || '').replace(/\D/g, '') };
+    log('atendimento #' + id);
+    if (c.contactId) {
+      omni.contacts.get(c.contactId).then(function (contato) {
+        if (!chat || chat.id !== id || !contato) return;
+        chat.nome = contato.name || chat.nome;
+        chat.telefone = String(contato.phone || chat.telefone).replace(/\D/g, '');
+      }, function (e) { log('contacts.get falhou: ' + (e && e.code)); });
+    }
+    atualizar();
+  }
+
+  omni.ready(function (ctx) {
+    var c = (ctx && ctx.config) || {};
+    cfg.apiUrl = c.api_url || '';
+    cfg.apiKey = c.api_key || '';
+    log('config: serviço ' + (cfg.apiUrl || 'ausente') + ', chave ' + (cfg.apiKey ? 'ok' : 'ausente'));
+    if (!cfg.apiUrl || !cfg.apiKey) aviso('A extensão está sem o endereço ou a chave do serviço do catálogo. Peça ao administrador para configurar a instalação.', 'erro');
+    omni.chats.getSelected().then(carregarChat, function (e) { log('chats.getSelected falhou: ' + (e && e.code)); $('sem-chat').hidden = false; });
+  });
+
+  omni.on('omniChatSelected', carregarChat);
+
+  // O painel lateral tem largura fixa; a altura acompanha o conteúdo.
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () {
+      Promise.resolve(omni.ui.resize(document.body.scrollHeight + 16)).catch(function () {});
+    }).observe(document.body);
+  }
+})();
+</script>
